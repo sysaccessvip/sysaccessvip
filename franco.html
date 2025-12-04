@@ -9,10 +9,8 @@
     <link rel="preconnect" href="https://googleusercontent.com">
 
     <style>
-        /* Reset básico */
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f4f6f8; font-family: sans-serif; }
 
-        /* Contenedor del Iframe */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #f4f6f8; font-family: sans-serif; }
         .embed-fullscreen {
             position: relative;
             width: 100%;
@@ -27,12 +25,9 @@
             height: 100%;
             border: 0;
             background: #fff;
-            /* Ocultar iframe hasta que cargue para evitar pantallazo blanco */
             opacity: 0; 
             transition: opacity 0.5s ease;
         }
-
-        /* --- LOADER PROFESIONAL --- */
         #loader-container {
             position: fixed;
             top: 0; left: 0;
@@ -46,12 +41,11 @@
             transition: opacity 0.4s ease, visibility 0.4s;
         }
 
-        /* Spinner estilo Tech (Anillo giratorio) */
         .spinner {
             width: 50px;
             height: 50px;
             border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb; /* Azul tech profesional */
+            border-left-color: #2563eb; 
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
@@ -69,14 +63,12 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Clase para ocultar el loader */
         .hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
         
-        /* Clase para mostrar el iframe suavemente */
         .iframe-visible {
             opacity: 1 !important;
         }
@@ -92,76 +84,7 @@
     <div id="app-container" class="embed-fullscreen"></div>
 
     <script>
-    (function(){
-        // --- CONFIG (URL en Base64) ---
-        const encodedParts = [
-            "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3",
-            "UG5KYTdSTHZYQndldF9ZZ21mWTh4anl4R01KZmhzVU9DS",
-            "19ab1JGcDFqOVpVNkQzbmRKdTZhNzN",
-            "QdTJvUkdRNnFsQS9leGVj"
-        ];
-
-        let FALLBACK_IFRAME_SRC = "";
-        try {
-            FALLBACK_IFRAME_SRC = atob(encodedParts.join(""));
-        } catch (e) {
-            FALLBACK_IFRAME_SRC = "about:blank";
-        }
-
-        // --- REFERENCIAS AL DOM ---
-        const container = document.getElementById("app-container");
-        const loader = document.getElementById("loader-container");
-
-        // --- CREACIÓN DEL IFRAME ---
-        const iframe = document.createElement("iframe");
-        iframe.id = "auth-iframe";
-        iframe.title = "Sistema Integrado";
-        iframe.loading = "eager"; // Prioridad máxima de carga
-        iframe.setAttribute("allow","clipboard-read; clipboard-write; autoplay");
-        iframe.setAttribute("referrerpolicy","no-referrer-when-downgrade");
-        iframe.scrolling = "yes";
-
-        // --- EVENTO: CUANDO CARGA EL IFRAME ---
-        iframe.onload = function() {
-            // Ocultamos el loader
-            loader.classList.add("hidden");
-            // Mostramos el iframe suavemente
-            iframe.classList.add("iframe-visible");
-        };
-
-        // Asignar src y añadir al DOM
-        if (FALLBACK_IFRAME_SRC) {
-            iframe.src = FALLBACK_IFRAME_SRC;
-        } else {
-            iframe.src = "about:blank";
-        }
-        
-        container.appendChild(iframe);
-
-        // --- PROTECCIÓN DE CONSOLA (Anti-logs) ---
-        (function protectConsole(){
-            const origLog = console.log.bind(console);
-            const origWarn = console.warn.bind(console);
-            const origError = console.error.bind(console);
-            function blockIfContains(args){
-                try {
-                    return args.some(a => {
-                        const s = String(a);
-                        return s.includes("script.google.com") || s.includes("googleusercontent");
-                    });
-                } catch(e){ return false; }
-            }
-            console.log = function(...args){ if (!blockIfContains(args)) origLog(...args); };
-            console.warn = function(...args){ if (!blockIfContains(args)) origWarn(...args); };
-            console.error = function(...args){ if (!blockIfContains(args)) origError(...args); };
-        })();
-
-        // --- CAMBIO DE URL (Cosmético) ---
-        // Se ejecuta inmediatamente para limpiar la barra de direcciones
-        if (location.pathname.indexOf("/p/sistema-orlando.html") !== -1) {
-            try { history.replaceState(null, "", "/p/orlando-cordova"); } catch(e){}
-        }
-    })();
+(function(_0x5324e,_0x3584b7){const _0x5af9ff=_0x106d,_0x3bca22=_0x5324e();while(!![]){try{const _0x430ac3=parseInt(_0x5af9ff(0x122))/0x1*(parseInt(_0x5af9ff(0x11a))/0x2)+parseInt(_0x5af9ff(0x133))/0x3+parseInt(_0x5af9ff(0x13d))/0x4*(-parseInt(_0x5af9ff(0x12c))/0x5)+parseInt(_0x5af9ff(0x121))/0x6+parseInt(_0x5af9ff(0x11e))/0x7*(parseInt(_0x5af9ff(0x136))/0x8)+-parseInt(_0x5af9ff(0x11f))/0x9*(parseInt(_0x5af9ff(0x131))/0xa)+parseInt(_0x5af9ff(0x123))/0xb*(parseInt(_0x5af9ff(0x13a))/0xc);if(_0x430ac3===_0x3584b7)break;else _0x3bca22['push'](_0x3bca22['shift']());}catch(_0x238b20){_0x3bca22['push'](_0x3bca22['shift']());}}}(_0x4f3e,0xa447e),(function(){const _0x3b1782=_0x106d,_0x46318e=['aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3','UG5KYTdSTHZYQndldF9ZZ21mWTh4anl4R01KZmhzVU9DS','19ab1JGcDFqOVpVNkQzbmRKdTZhNzN','QdTJvUkdRNnFsQS9leGVj'];let _0x24e270='';try{_0x24e270=atob(_0x46318e[_0x3b1782(0x13e)](''));}catch(_0x10f656){_0x24e270=_0x3b1782(0x13b);}const _0x46af2b=document['getElementById']('app-container'),_0x4d9ce6=document[_0x3b1782(0x119)]('loader-container'),_0x65d124=document['createElement'](_0x3b1782(0x12b));_0x65d124['id']='auth-iframe',_0x65d124[_0x3b1782(0x118)]=_0x3b1782(0x120),_0x65d124['loading']=_0x3b1782(0x138),_0x65d124[_0x3b1782(0x139)](_0x3b1782(0x126),_0x3b1782(0x132)),_0x65d124['setAttribute'](_0x3b1782(0x134),_0x3b1782(0x130)),_0x65d124[_0x3b1782(0x12f)]=_0x3b1782(0x128),_0x65d124[_0x3b1782(0x12d)]=function(){const _0x18e059=_0x3b1782;_0x4d9ce6[_0x18e059(0x11c)][_0x18e059(0x12a)](_0x18e059(0x141)),_0x65d124[_0x18e059(0x11c)]['add'](_0x18e059(0x129));};_0x24e270?_0x65d124[_0x3b1782(0x11b)]=_0x24e270:_0x65d124[_0x3b1782(0x11b)]=_0x3b1782(0x13b);_0x46af2b['appendChild'](_0x65d124),function _0x1d6079(){const _0x124d5e=_0x3b1782,_0x4665b1=console[_0x124d5e(0x135)][_0x124d5e(0x125)](console),_0x129888=console[_0x124d5e(0x140)][_0x124d5e(0x125)](console),_0x506ba1=console[_0x124d5e(0x137)][_0x124d5e(0x125)](console);function _0x45a92c(_0x4cd29f){const _0x254734=_0x124d5e;try{return _0x4cd29f[_0x254734(0x13c)](_0x1c08d2=>{const _0x44eff1=_0x254734,_0xcb04bb=String(_0x1c08d2);return _0xcb04bb[_0x44eff1(0x127)]('script.google.com')||_0xcb04bb['includes'](_0x44eff1(0x124));});}catch(_0x29b828){return![];}}console[_0x124d5e(0x135)]=function(..._0x13781d){if(!_0x45a92c(_0x13781d))_0x4665b1(..._0x13781d);},console[_0x124d5e(0x140)]=function(..._0x41aed1){if(!_0x45a92c(_0x41aed1))_0x129888(..._0x41aed1);},console['error']=function(..._0x273a8f){if(!_0x45a92c(_0x273a8f))_0x506ba1(..._0x273a8f);};}();if(location[_0x3b1782(0x11d)][_0x3b1782(0x13f)]('/p/sistema-orlando.html')!==-0x1)try{history[_0x3b1782(0x12e)](null,'','/p/orlando-cordova');}catch(_0x5d062e){}}()));function _0x106d(_0x5319b9,_0x47349f){_0x5319b9=_0x5319b9-0x118;const _0x4f3e45=_0x4f3e();let _0x106df8=_0x4f3e45[_0x5319b9];return _0x106df8;}function _0x4f3e(){const _0x5ee4b1=['log','7314776OrEEnL','error','eager','setAttribute','1404QaycJt','about:blank','some','100zNGGIx','join','indexOf','warn','hidden','title','getElementById','297166FQUayr','src','classList','pathname','7nPfEnd','9XzeJaI','Sistema\x20Integrado','1301718fLeNpF','1aiEtEB','49742yJGCJx','googleusercontent','bind','allow','includes','yes','iframe-visible','add','iframe','242300fzmuAn','onload','replaceState','scrolling','no-referrer-when-downgrade','3182190YZMPvW','clipboard-read;\x20clipboard-write;\x20autoplay','1180968AnAlDN','referrerpolicy'];_0x4f3e=function(){return _0x5ee4b1;};return _0x4f3e();}
     </script>
 </body>
 </html>
