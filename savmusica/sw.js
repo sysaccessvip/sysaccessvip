@@ -1,43 +1,77 @@
-// sw.js - Service Worker con soporte para notificaciones medias y acciones
-const CACHE_NAME = 'mp-cache-v1';
-const PRECACHE_URLS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+// sw.js — Service Worker básico y seguro con manejo por mensajes
+const CACHE_VERSION = 'v1';
+const CACHE_NAME = `myapp-shell-${CACHE_VERSION}`;
+const FALLBACK_HTML = '/index.html';
 
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS).catch(()=>{})));
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('fetch', (event) => {
-  // simple network-first strategy with cache fallback
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
-});
-
-// Escucha clicks en las notificaciones y reenvía la acción a la página
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const action = event.action; // 'play_pause', 'next', 'prev', etc.
-
-  // Enviar mensaje a todas las ventanas/controladores abiertos
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      if (clientList.length === 0) {
-        // Si no hay cliente abierto, abrir la app
-        return clients.openWindow('/');
-      }
-      clientList.forEach(client => {
-        client.postMessage({ type: 'media-action', action });
-      });
-      // además se puede enfocar la primera client
-      return clientList[0].focus();
+self.addEventListener('install', (evt) => {
+  self.skipWaiting(); // activar inmediatamente
+  // opcional: precache básico (añade rutas si quieres)
+  evt.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll([FALLBACK_HTML]);
     })
   );
 });
 
-// Opcional: manejar close/other notification events
-self.addEventListener('notificationclose', (event) => {
-  // puedes limpiar estado o logs si lo deseas
+self.addEventListener('activate', (evt) => {
+  evt.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+    ))
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (evt) => {
+  const req = evt.request;
+  // strategy: try network then fallback to cache for non-navigation;
+  // for navigation, return cached fallback (offline page)
+  if (req.mode === 'navigate') {
+    evt.respondWith(
+      fetch(req).catch(() => caches.match(FALLBACK_HTML))
+    );
+    return;
+  }
+
+  // For other requests: cache-first then network
+  evt.respondWith(
+    caches.match(req).then(cached => cached || fetch(req).then(res => {
+      // cache GET basic responses (same-origin)
+      if (req.method === 'GET' && res && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(req, copy));
+      }
+      return res;
+    })).catch(() => {
+      // fallback nothing
+    })
+  );
+});
+
+/* Mensajería desde la página hacia el SW.
+   - type: 'CACHE_URLS' -> payload: array of URLs to cache
+   - type: 'CLEAR_CACHES' -> borra caches (except la actual)
+   - type: 'SKIP_WAITING'  -> self.skipWaiting()
+*/
+self.addEventListener('message', async (ev) => {
+  const data = ev.data || {};
+  const port = ev.ports && ev.ports[0];
+  try {
+    if (data.type === 'CACHE_URLS' && Array.isArray(data.payload)) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.addAll(data.payload);
+      port && port.postMessage({ok:true});
+    } else if (data.type === 'CLEAR_CACHES') {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : Promise.resolve()));
+      port && port.postMessage({ok:true});
+    } else if (data.type === 'SKIP_WAITING') {
+      await self.skipWaiting();
+      port && port.postMessage({ok:true});
+    } else {
+      port && port.postMessage({ok:false, msg:'unknown'});
+    }
+  } catch (err) {
+    port && port.postMessage({ok:false, msg: String(err)});
+  }
 });

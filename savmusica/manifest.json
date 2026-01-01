@@ -1,21 +1,16 @@
 {
-  "name": "Music Player",
-  "short_name": "MiPlayer",
-  "start_url": "/index.html",
+  "name": "Mi Proyecto",
+  "short_name": "MiApp",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#111827",
-  "description": "Reproductor de música basado en YouTube con controles en pantalla de bloqueo.",
+  "theme_color": "#0b1220",
+  "background_color": "#ffffff",
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Abrir proyecto", "url": "/index.html", "short_name": "Abrir" }
   ]
 }
