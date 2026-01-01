@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Music Player</title>
+    <title>SIII</title>
 
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -988,37 +988,38 @@ dom.authForm?.addEventListener('submit', async (ev) => {
     function onHiddenReady() { checkPlayersReady(); }
     function checkPlayersReady() { if (!state.visiblePlayer || !state.hiddenPlayer) return; state.playersReady = true; try { const iframeV = state.visiblePlayer.getIframe(); const iframeH = state.hiddenPlayer.getIframe(); if (iframeV) iframeV.setAttribute('allow', 'autoplay; encrypted-media; fullscreen'); if (iframeH) iframeH.setAttribute('allow', 'autoplay; encrypted-media; fullscreen'); } catch (e) {} resizePlayers(); if (state.pendingPlay) { const p = state.pendingPlay; state.pendingPlay = null; loadAndPlayById(p.videoId, p.autoplay); } if (state.queuedTrack) { const { video, queue, queueIndex } = state.queuedTrack; state.queuedTrack = null; playTrack(video, queue, queueIndex); } }
    
-  // === REEMPLAZAR ESTA FUNCIÓN COMPLETA ===
+// === REEMPLAZA setupMediaSession POR ESTA VERSIÓN ===
     function setupMediaSession() {
         if (!('mediaSession' in navigator) || !state.currentTrack) return;
         
         const player = getActivePlayer();
         if (!player) return;
 
-        // 1. Definir los metadatos (Título y Artista)
+        // 1. Metadatos (igual que antes)
         const snippet = state.currentTrack.snippet;
-        const title = snippet.title;
-        const artist = snippet.channelTitle;
-        const thumb = snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url;
-        
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: title,
-            artist: artist,
-            artwork: [{ src: thumb, sizes: '512x512', type: 'image/jpeg' }]
+            title: snippet.title,
+            artist: snippet.channelTitle,
+            artwork: [{ src: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url, sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        // 2. Botones de control del celular
-        navigator.mediaSession.setActionHandler('play', () => { getActivePlayer()?.playVideo(); });
-        navigator.mediaSession.setActionHandler('pause', () => { getActivePlayer()?.pauseVideo(); });
-        navigator.mediaSession.setActionHandler('previoustrack', () => { playPrev(); });
-        navigator.mediaSession.setActionHandler('nexttrack', () => { playNext(); });
+        // 2. Botones con "Intención de Usuario"
+        navigator.mediaSession.setActionHandler('play', () => { 
+            state.userIntentionallyPaused = false; // El usuario quiere Play
+            getActivePlayer()?.playVideo(); 
+        });
+        navigator.mediaSession.setActionHandler('pause', () => { 
+            state.userIntentionallyPaused = true;  // El usuario quiere Pausa
+            getActivePlayer()?.pauseVideo(); 
+        });
         
-        // 3. Importante: Permitir que el usuario mueva la barra desde el celular
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
+        
         navigator.mediaSession.setActionHandler('seekto', (details) => {
              if (details.seekTime && player.seekTo) player.seekTo(details.seekTime, true);
         });
 
-        // 4. Intentar sincronizar el tiempo inmediatamente
         updateMediaSessionPosition();
     }
 
@@ -1049,7 +1050,8 @@ function updateMediaSessionPosition() {
         }
     }
 
-function onPlayerStateChange(event) {
+// === REEMPLAZA onPlayerStateChange POR ESTA ===
+    function onPlayerStateChange(event) {
         const active = getActivePlayer();
         if (event.target !== active) return;
         const s = event.data;
@@ -1057,32 +1059,35 @@ function onPlayerStateChange(event) {
         if (s === YT.PlayerState.PLAYING) { 
             setPlayIcon(false); 
             state.isPlaying = true; 
-            showMiniPlayerAfterPlay(); 
-            startProgressInterval(); // Esto mueve tu web
+            // Si está sonando, obviamente el usuario no quiere pausa
+            state.userIntentionallyPaused = false; 
             
-            // 1. Configurar metadatos (Titulo, foto)
+            showMiniPlayerAfterPlay(); 
+            startProgressInterval();
             setupMediaSession(); 
-            // 2. Sincronizar UNA VEZ al arrancar. Android se encarga de moverlo después.
             updateMediaSessionPosition();
         }
         else if (s === YT.PlayerState.PAUSED || s === YT.PlayerState.CUED) { 
+            // === AQUÍ ESTÁ LA MAGIA PARA SEGUNDO PLANO ===
+            // Si el documento está oculto (minimizaste) Y NO fue tu intención pausar...
+            if (document.hidden && !state.userIntentionallyPaused) {
+                // ¡El celular intentó detenerlo, pero nosotros lo forzamos a seguir!
+                console.log("Sistema pausó el audio, reanudando forzosamente...");
+                active.playVideo();
+                return; // Salimos para no cambiar íconos
+            }
+            
             setPlayIcon(true); 
             state.isPlaying = false; 
             stopProgressInterval(); 
-            
-            // 3. Sincronizar al pausar para congelar la barra en el punto exacto
             updateMediaSessionPosition();
         }
         else if (s === YT.PlayerState.ENDED) { 
             stopProgressInterval(); 
-            // Resetear estado al terminar
-            if ('mediaSession' in navigator) {
-                 navigator.mediaSession.playbackState = "none";
-            }
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "none";
             playNext(); 
         }
     }
-
     function getApiKey() { return CONFIG.API_KEYS[state.currentKeyIndex % CONFIG.API_KEYS.length]; }
     function rotateApiKey(){ state.currentKeyIndex = (state.currentKeyIndex + 1) % CONFIG.API_KEYS.length; console.warn('Rotando API key ->', state.currentKeyIndex); }
     function buildApiUrl(endpoint, params) { const BASE_URL = 'https://www.googleapis.com/youtube/v3'; const url = new URL(`${BASE_URL}${endpoint}`); for (const key in params) url.searchParams.set(key, params[key]); return url; }
@@ -1233,7 +1238,35 @@ function setPlayIcon(isPaused) {
     function getActivePlayer() { return document.hidden ? (state.hiddenPlayer || state.visiblePlayer) : (state.visiblePlayer || state.hiddenPlayer); }
     function loadAndPlayById(videoId, autoplay = true) { if (!videoId || !state.playersReady) { state.pendingPlay = { videoId, autoplay }; return; } const target = getActivePlayer(); const other = (target === state.visiblePlayer) ? state.hiddenPlayer : state.visiblePlayer; try { try { if (other && other.stopVideo) other.stopVideo(); } catch(e){} if (typeof target.loadVideoById === 'function') { target.loadVideoById({ videoId, startSeconds: 0 }); if (autoplay) setTimeout(()=>{ try{ target.playVideo(); }catch(e){} }, 100); } else if (typeof target.cueVideoById === 'function') { target.cueVideoById({ videoId, startSeconds: 0 }); if (autoplay) setTimeout(()=>{ try{ target.playVideo(); }catch(e){} }, 100); } } catch (e) { console.error("Error loadAndPlayById:", e); } }
     function playTrack(video, queue = [], queueIndex = 0) { const videoId = typeof video.id === 'object' ? video.id.videoId : video.id; if (!videoId) { console.error("No videoId:", video); return; } if (!state.playersReady) { state.queuedTrack = { video, queue, queueIndex }; updatePlayerUI(video); showFullPlayer(); setPlayIcon(true); return; } state.currentTrack = video; state.currentQueue = queue; state.currentQueueIndex = queueIndex; state.queuedTrack = null; addToRecents(video); loadAndPlayById(videoId, true); updatePlayerUI(video); if (!document.hidden) showFullPlayer(); updatePlayingIndicator(); }
-    function togglePlayPause() { if (!state.playersReady && state.queuedTrack) { const { video, queue, queueIndex } = state.queuedTrack; playTrack(video, queue, queueIndex); return; } const active = getActivePlayer(); if (!active || !state.currentTrack) return; try { const st = (typeof active.getPlayerState === 'function') ? active.getPlayerState() : -1; if (st === YT.PlayerState.PLAYING) active.pauseVideo(); else active.playVideo(); } catch(e) { console.warn("togglePlayPause error", e); } }
+// === REEMPLAZA TU FUNCIÓN togglePlayPause POR ESTA ===
+    function togglePlayPause() {
+        // Manejo de cola (sin cambios)
+        if (!state.playersReady && state.queuedTrack) { 
+            const { video, queue, queueIndex } = state.queuedTrack; 
+            playTrack(video, queue, queueIndex); 
+            return; 
+        }
+
+        const active = getActivePlayer();
+        if (!active || !state.currentTrack) return;
+
+        try {
+            const st = (typeof active.getPlayerState === 'function') ? active.getPlayerState() : -1;
+            
+            if (st === YT.PlayerState.PLAYING) {
+                // MARCAMOS QUE FUE EL USUARIO QUIEN PAUSÓ
+                state.userIntentionallyPaused = true; 
+                active.pauseVideo();
+            } else {
+                // MARCAMOS QUE EL USUARIO QUIERE REPRODUCIR
+                state.userIntentionallyPaused = false;
+                active.playVideo();
+            }
+        } catch(e) { 
+            console.warn("togglePlayPause error", e); 
+        }
+    }
+    
     function playNext() { if (!state.currentQueue.length) return; if (state.isLoop) { playTrack(state.currentTrack, state.currentQueue, state.currentQueueIndex); return; } let nextIndex = state.isShuffle ? Math.floor(Math.random() * state.currentQueue.length) : (state.currentQueueIndex + 1) % state.currentQueue.length; playTrack(state.currentQueue[nextIndex], state.currentQueue, nextIndex); }
     function playPrev() { if (!state.currentQueue.length) return; let prevIndex = state.isShuffle ? Math.floor(Math.random() * state.currentQueue.length) : (state.currentQueueIndex - 1 + state.currentQueue.length) % state.currentQueue.length; playTrack(state.currentQueue[prevIndex], state.currentQueue, prevIndex); }
     function toggleShuffle() { state.isShuffle = !state.isShuffle; updateShuffleLoopIcons(); }
@@ -1524,4 +1557,3 @@ onAuthStateChanged(auth, async (user) => {
     </script>
 </body>
 </html>
-
