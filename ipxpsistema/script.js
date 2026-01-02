@@ -25,7 +25,7 @@ let CURRENT_YEAR = new Date().getFullYear().toString();
 let CURRENT_MONTH = new Date().getMonth(); // Mes actual por defecto (0-11)
 let CURRENT_PAGE = 'dashboard';
 let ALL_MEMBERS_CACHE = [];
-
+let EDIT_MODE = false;
 let idleTime = 0;
 let idleInterval;
 const TIME_LIMIT_SEC = 120; // 2 min
@@ -435,8 +435,13 @@ window.renderList = (type) => {
                     <td>${desc}</td>
                     <td class="text-end fw-bold ${type==='pagos'?'text-danger':'text-dark'}">S/. ${parseFloat(i.monto).toFixed(2)}</td>
                     <td class="text-center">${i.voucherUrl ? `<button class="btn btn-sm btn-light" onclick="viewImg('${i.voucherUrl}','${i.fecha}')"><i class="bi bi-image"></i></button>` : '-'}</td>
-                    ${IS_ADMIN ? `<td class="text-center"><button class="btn btn-sm btn-light text-danger" onclick="delItem('${type}','${i.id}')"><i class="bi bi-trash"></i></button></td>` : ''}
-                </tr>`;
+${IS_ADMIN ? `
+    <td class="text-center">
+        <button class="btn btn-sm btn-light text-primary me-1" onclick="startEdit('${type}', '${encodeURIComponent(JSON.stringify(i))}')"><i class="bi bi-pencil-square"></i></button>
+        <button class="btn btn-sm btn-light text-danger" onclick="delItem('${type}','${i.id}')"><i class="bi bi-trash"></i></button>
+    </td>` : ''}
+                
+                    </tr>`;
             });
         }
     });
@@ -496,8 +501,11 @@ window.showMemberDetail = (name, encodedData) => {
                 <div class="d-flex align-items-center gap-2">
                     <span class="fw-bold text-dark">S/. ${parseFloat(t.monto).toFixed(2)}</span>
                     ${t.voucherUrl ? `<button class="btn btn-sm btn-light border" onclick="viewImg('${t.voucherUrl}','${t.fecha}')"><i class="bi bi-image"></i></button>` : ''}
-                    ${IS_ADMIN ? `<button class="btn btn-sm btn-light text-danger" onclick="delItem('diezmos','${t.id}')"><i class="bi bi-trash"></i></button>` : ''}
-                </div>
+  ${IS_ADMIN ? `
+    <button class="btn btn-sm btn-light text-primary border me-1" onclick="startEdit('diezmos', '${encodeURIComponent(JSON.stringify(t))}')"><i class="bi bi-pencil-square"></i></button>
+    <button class="btn btn-sm btn-light text-danger border" onclick="delItem('diezmos','${t.id}')"><i class="bi bi-trash"></i></button>` : ''}
+               
+                    </div>
             </div>`;
     });
     listHTML += `</div>`;
@@ -537,26 +545,76 @@ function showSuggestions() {
 window.selectSuggestion = (name, gender) => { searchInput.value = name; selectGender(gender || 'M'); suggestionsBox.classList.remove('active'); }
 
 window.openForm = async (type) => {
+    // Reseteamos el formulario y variables de edición
     document.getElementById('dataForm').reset();
+    EDIT_MODE = false; 
+    document.getElementById('edit_id').value = '';
+    document.getElementById('edit_voucher_url').value = '';
+    
+    // Configuración normal
     document.getElementById('formType').value = type;
     document.getElementById('f_fecha').valueAsDate = new Date();
     document.querySelectorAll('.field-conditional').forEach(e => e.classList.add('d-none'));
     selectGender('M'); 
+    
     const hdr = document.getElementById('modalHeader');
     const btn = document.getElementById('btnGuardar');
+    const title = document.getElementById('modalTitle'); // Asegurate de tener este ID en tu HTML o usa querySelector
+    
+    // Colores y textos
     hdr.style.background = type==='pagos' ? '#ef4444' : 'var(--corp-dark)';
     btn.className = `btn px-4 ${type==='pagos'?'btn-danger':'btn-primary'}`;
+    btn.textContent = "Guardar"; // Texto por defecto
+    if(document.getElementById('modalTitle')) document.getElementById('modalTitle').textContent = "Nuevo Registro";
+
+    // Mostrar campos específicos
     if(type === 'diezmos') { document.getElementById('divMesDiezmo').classList.remove('d-none'); searchInput.placeholder = "Buscar hermano..."; }
     else if(type === 'ofrendas') { document.getElementById('divOfrendaDia').classList.remove('d-none'); searchInput.placeholder = "Detalle..."; }
     else if(type === 'pagos') { document.getElementById('divPagoTipo').classList.remove('d-none'); await loadCategoriasSelect(); searchInput.placeholder = "Descripción..."; }
+    
     new bootstrap.Modal('#transactionModal').show();
 }
-
 async function loadCategoriasSelect() {
     const snap = await get(ref(db, 'configuracion/categorias_gastos'));
     const cats = snap.val() || ["Alquiler", "Servicios", "Mantenimiento", "Ayuda Social", "Honorarios", "Otros"];
     document.getElementById('f_tipo_pago').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
 }
+
+
+
+window.startEdit = async (type, encodedItem) => {
+    // 1. Abrimos el formulario visualmente para que se configuren los campos (ocultos/visibles)
+    await window.openForm(type);
+
+    // 2. Decodificamos los datos
+    const item = JSON.parse(decodeURIComponent(encodedItem));
+
+    // 3. Llenamos los datos en el formulario
+    EDIT_MODE = true;
+    document.getElementById('edit_id').value = item.id;
+    document.getElementById('edit_voucher_url').value = item.voucherUrl || '';
+    
+    document.getElementById('f_fecha').value = item.fecha;
+    document.getElementById('f_monto').value = item.monto;
+    document.getElementById('f_nombre').value = item.nombre;
+
+    // 4. Llenamos campos específicos según el tipo
+    if(type === 'diezmos') {
+        document.getElementById('f_mes_diezmo').value = item.mesCorrespondiente;
+        selectGender(item.genero || 'M');
+    } else if(type === 'ofrendas') {
+        document.getElementById('f_dia_ofrenda').value = item.diaServicio;
+    } else if(type === 'pagos') {
+        document.getElementById('f_tipo_pago').value = item.categoriaGasto;
+    }
+
+    // 5. Cambiamos el botón para que diga "Actualizar"
+    const btn = document.getElementById('btnGuardar');
+    btn.textContent = "Actualizar";
+    if(document.getElementById('modalTitle')) document.getElementById('modalTitle').textContent = "Editar Registro";
+}
+
+
 
 window.manageCategories = async () => {
     const snap = await get(ref(db, 'configuracion/categorias_gastos'));
@@ -570,26 +628,61 @@ window.manageCategories = async () => {
     }
 }
 
+
 window.saveTransaction = async () => {
     const type = document.getElementById('formType').value;
+    const id = document.getElementById('edit_id').value; // ID si estamos editando
+    const oldUrl = document.getElementById('edit_voucher_url').value; // URL vieja
+    
     const fecha = document.getElementById('f_fecha').value;
     let nombre = document.getElementById('f_nombre').value;
     const monto = document.getElementById('f_monto').value;
     const file = document.getElementById('f_file').files[0];
+
     if(!monto || !fecha) return Toast.fire({ icon: 'warning', title: 'Faltan datos' });
     if(type!=='ofrendas' && !nombre) return Toast.fire({ icon: 'warning', title: 'Falta nombre' });
     if(!nombre) nombre = 'Anónimo';
+
     Swal.showLoading();
-    let url = '';
+    
+    // Lógica de Imagen: Si sube nueva, usa la nueva. Si no, usa la vieja.
+    let url = oldUrl; 
     if(file) {
         const fd = new FormData(); fd.append("image", file);
-        try { const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd }); const j = await r.json(); if(j.success) url = j.data.url; } catch(e) {}
+        try { 
+            const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd }); 
+            const j = await r.json(); 
+            if(j.success) url = j.data.url; 
+        } catch(e) {}
     }
+
     const data = { fecha, nombre, monto: parseFloat(monto), voucherUrl: url };
-    if(type==='diezmos') { data.mesCorrespondiente = parseInt(document.getElementById('f_mes_diezmo').value); data.genero = document.querySelector('input[name="genero"]:checked').value; }
+    
+    // Campos específicos
+    if(type==='diezmos') { 
+        data.mesCorrespondiente = parseInt(document.getElementById('f_mes_diezmo').value); 
+        data.genero = document.querySelector('input[name="genero"]:checked').value; 
+    }
     if(type==='ofrendas') data.diaServicio = document.getElementById('f_dia_ofrenda').value;
     if(type==='pagos') data.categoriaGasto = document.getElementById('f_tipo_pago').value;
-    try { await push(ref(db, `transacciones/${CURRENT_YEAR}/${type}`), data); bootstrap.Modal.getInstance(document.getElementById('transactionModal')).hide(); Swal.close(); Toast.fire({ icon: 'success', title: 'Guardado', background: '#10b981', color:'white' }); } catch(e) { Toast.fire({ icon: 'error', title: 'Error' }); }
+
+    try { 
+        if(EDIT_MODE && id) {
+            // MODO EDICIÓN: Usamos 'update' y la ruta específica del ID
+            await update(ref(db, `transacciones/${CURRENT_YEAR}/${type}/${id}`), data);
+            Toast.fire({ icon: 'success', title: 'Actualizado correctamente', background: '#3b82f6', color:'white' });
+        } else {
+            // MODO CREACIÓN: Usamos 'push' para crear nuevo ID
+            await push(ref(db, `transacciones/${CURRENT_YEAR}/${type}`), data);
+            Toast.fire({ icon: 'success', title: 'Guardado', background: '#10b981', color:'white' });
+        }
+        
+        bootstrap.Modal.getInstance(document.getElementById('transactionModal')).hide(); 
+        Swal.close(); 
+    } catch(e) { 
+        console.error(e);
+        Toast.fire({ icon: 'error', title: 'Error al guardar' }); 
+    }
 }
 
 window.delItem = (t,id) => {
