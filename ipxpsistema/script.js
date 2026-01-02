@@ -327,7 +327,7 @@ window.renderList = (type) => {
     const btnCats = (type === 'pagos' && IS_ADMIN) ? `<button class="btn btn-outline-secondary rounded-circle me-2" onclick="manageCategories()"><i class="bi bi-gear"></i></button>` : '';
 
     let tHeaders = `<th>FECHA</th><th>DETALLE</th><th class="text-end">MONTO</th><th class="text-center">VOUCHER</th>` + (IS_ADMIN ? `<th>ACCIÓN</th>` : '');
-    if(type === 'diezmos') { tHeaders = `<th>HERMANO</th><th>MESES PAGADOS</th><th class="text-end">TOTAL</th><th class="text-center">HISTORIAL</th>`; }
+    if(type === 'diezmos') { tHeaders = `<th>HERMANO</th><th>MESES PAGADOS</th><th class="text-end">TOTAL</th><th class="text-center">ACCIONES</th>`; }
 
     // ¡AQUI ESTÁ LA CORRECCIÓN! Agregué el div "totalSummaryBox" de nuevo
     container.innerHTML = `
