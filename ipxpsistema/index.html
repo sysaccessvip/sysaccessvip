@@ -80,23 +80,23 @@
         <div class="nav flex-column px-3 mt-4 gap-2">
             
             <span class="menu-label">PRINCIPAL</span>
-            <a href="#dashboard" class="nav-link active" onclick="loadPage('dashboard')" data-page="dashboard">
+            <a href="dashboard" class="nav-link active" onclick="event.preventDefault(); loadPage('dashboard')" data-page="dashboard">
                 <i class="bi bi-grid-1x2-fill"></i>
                 <span>Vista General</span>
             </a>
 
             <span class="menu-label mt-3">FINANZAS</span>
-            <a href="#diezmos" class="nav-link" onclick="loadPage('diezmos')" data-page="diezmos">
+            <a href="diezmos" class="nav-link" onclick="event.preventDefault(); loadPage('diezmos')" data-page="diezmos">
                 <i class="bi bi-people-fill"></i>
                 <span>Control Diezmos</span>
             </a>
-            <a href="#ofrendas" class="nav-link" onclick="loadPage('ofrendas')" data-page="ofrendas">
+            <a href="ofrendas" class="nav-link" onclick="event.preventDefault(); loadPage('ofrendas')" data-page="ofrendas">
                 <i class="bi bi-basket-fill"></i>
                 <span>Registro Ofrendas</span>
             </a>
 
             <span class="menu-label mt-3">EGRESOS</span>
-            <a href="#pagos" class="nav-link" onclick="loadPage('pagos')" data-page="pagos">
+            <a href="pagos" class="nav-link" onclick="event.preventDefault(); loadPage('pagos')" data-page="pagos">
                 <i class="bi bi-arrow-down-circle-fill"></i>
                 <span>Gastos / Salidas</span>
             </a>
