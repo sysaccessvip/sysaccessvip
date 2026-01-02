@@ -65,20 +65,43 @@
 
     <div class="overlay" onclick="toggleSidebar()"></div>
 
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <small class="text-white-50 text-uppercase ls-2">Tesorería</small>
-            <div class="brand-title text-white fw-bold fs-5">Camino de Santidad</div>
+<nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-box">
+                <img src="https://iili.io/fWiyr9p.png" alt="Logo">
+            </div>
+            <div class="brand-text">
+                <small>Sistema</small>
+                <div>Camino de Santidad</div>
+            </div>
         </div>
-        <div class="nav flex-column px-2 mt-3">
-            <a href="#" class="nav-link active" onclick="loadPage('dashboard')" data-page="dashboard"><i class="bi bi-grid-1x2-fill me-3"></i> Vista General</a>
-            <div class="text-uppercase text-white-50 fw-bold px-3 mt-4 mb-2" style="font-size: 0.7rem;">Finanzas</div>
-            <a href="#" class="nav-link" onclick="loadPage('diezmos')" data-page="diezmos"><i class="bi bi-people-fill me-3"></i> Diezmos</a>
-            <a href="#" class="nav-link" onclick="loadPage('ofrendas')" data-page="ofrendas"><i class="bi bi-basket-fill me-3"></i> Ofrendas</a>
-            <div class="text-uppercase text-white-50 fw-bold px-3 mt-4 mb-2" style="font-size: 0.7rem;">Salidas</div>
-            <a href="#" class="nav-link text-danger-emphasis" onclick="loadPage('pagos')" data-page="pagos"><i class="bi bi-arrow-down-circle-fill me-3"></i> Gastos</a>
+
+        <div class="nav flex-column px-3 mt-4 gap-2">
+            
+            <span class="menu-label">PRINCIPAL</span>
+            <a href="#" class="nav-link active" onclick="loadPage('dashboard')" data-page="dashboard">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Vista General</span>
+            </a>
+
+            <span class="menu-label mt-3">FINANZAS</span>
+            <a href="#" class="nav-link" onclick="loadPage('diezmos')" data-page="diezmos">
+                <i class="bi bi-people-fill"></i>
+                <span>Control Diezmos</span>
+            </a>
+            <a href="#" class="nav-link" onclick="loadPage('ofrendas')" data-page="ofrendas">
+                <i class="bi bi-basket-fill"></i>
+                <span>Registro Ofrendas</span>
+            </a>
+
+            <span class="menu-label mt-3">EGRESOS</span>
+            <a href="#" class="nav-link" onclick="loadPage('pagos')" data-page="pagos">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+                <span>Gastos / Salidas</span>
+            </a>
         </div>
-        <div class="mt-auto p-4 border-top border-white border-opacity-10" id="authSection"></div>
+
+        <div class="mt-auto p-3 m-3 rounded-3 bg-white bg-opacity-10" id="authSection"></div>
     </nav>
 
     <div class="main-content">
