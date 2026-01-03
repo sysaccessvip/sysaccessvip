@@ -461,11 +461,24 @@ body.swal2-toast-shown .swal2-container.swal2-top-end { top: 20px !important; ri
     width: 100%;
 }
 
+/* REEMPLAZA TU CÓDIGO ANTERIOR CON ESTO */
 .voucher-img-container {
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 5px;
-    background: #f8fafc;
+    background: #f1f5f9;
+    width: 100%;
+    height: 100%;             /* Ocupa toda la altura disponible */
+    min-height: 350px;        /* Altura mínima para que se vea bien */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.voucher-img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;      /* La imagen se ajusta sin cortarse */
+    display: block;
 }
 
 .day-badge {
@@ -677,3 +690,87 @@ body.swal2-toast-shown .swal2-container.swal2-top-end { top: 20px !important; ri
     .premium-title { font-size: 2.5rem; margin-bottom: 10px; }
     .glass-card { margin-bottom: 30px; }
 }
+.resumen-row {
+    padding: 12px 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid transparent; /* Para que el borde no cambie el tamaño */
+    transition: transform 0.2s ease;
+}
+
+.resumen-row:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.row-saldo {
+    background-color: #fffbeb; /* Amarillo muy suave */
+    border-color: #fcd34d;
+    color: #92400e;
+}
+
+.row-ingreso {
+    background-color: #ecfdf5; /* Verde muy suave */
+    border-color: #6ee7b7;
+    color: #065f46;
+}
+
+.row-diezmo {
+    background-color: #eff6ff; /* Azul muy suave */
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
+.row-gasto {
+    background-color: #fef2f2; /* Rojo muy suave */
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+.row-icon {
+    font-size: 1.1rem;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.stat-card-modern {
+    background: white;
+    border-radius: 20px;
+    padding: 25px 30px;
+    position: relative;   
+    overflow: hidden;   
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1);
+}
+
+.sc-bg-icon {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 7rem;     
+    opacity: 0.05;        
+    transform: rotate(-15deg);
+    pointer-events: none;
+    color: #334155;
+}
+
+.sc-blue { border-bottom: 5px solid #3b82f6; }
+.sc-blue .sc-amount { color: #3b82f6; }
+
+.sc-green { border-bottom: 5px solid #10b981; }
+.sc-green .sc-amount { color: #10b981; }
+
+.sc-red { border-bottom: 5px solid #ef4444; }
+.sc-red .sc-amount { color: #ef4444; }
